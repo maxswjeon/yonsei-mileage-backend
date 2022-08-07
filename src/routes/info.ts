@@ -70,6 +70,10 @@ const getInfo = async (req: Request, res: Response) => {
   const data = [];
 
   for (const file of fileList) {
+    if (file === "20222.csv") {
+      continue;
+    }
+
     const records: any[] = [];
     const parser = fs
       .createReadStream(
