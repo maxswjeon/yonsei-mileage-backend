@@ -70,7 +70,9 @@ const getInfo = async (req: Request, res: Response) => {
   const data = [];
 
   for (const file of fileList) {
-    if (file === "20222.csv") {
+    console.log(file);
+
+    if (file === "2022-2.csv") {
       continue;
     }
 
