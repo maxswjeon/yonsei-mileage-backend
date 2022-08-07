@@ -27,15 +27,15 @@ const min_value_mileage = (
   const { user_grade, user_subject, is_graduate, is_first } = studentInfo;
 
   const min = data
-    .filter((item: any) => {
-      return (
-        item[8] == user_grade &&
-        item[3] == user_subject &&
-        item[4] == (is_graduate ? "Y" : "N") &&
-        item[5] == (is_first ? "Y" : "N") &&
-        item[9] == "O"
-      );
-    })
+    // .filter((item: any) => {
+    //   return (
+    //     item[8] == user_grade &&
+    //     item[3] == user_subject &&
+    //     item[4] == (is_graduate ? "Y" : "N") &&
+    //     item[5] == (is_first ? "Y" : "N") &&
+    //     item[9] == "O"
+    //   );
+    // })
     .sort((a, b) => Number(a[1]) - Number(b[1]))
     .map((d) => d[1]);
 
@@ -70,8 +70,6 @@ const getInfo = async (req: Request, res: Response) => {
   const data = [];
 
   for (const file of fileList) {
-    console.log(file);
-
     if (file === "2022-2.csv") {
       continue;
     }
