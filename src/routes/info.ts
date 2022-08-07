@@ -98,6 +98,7 @@ const getInfo = async (req: Request, res: Response) => {
       hyhg: file.split(".")[0],
       min,
       data: records.filter((data) => data[1] == min),
+      raw: records,
     });
   }
 
