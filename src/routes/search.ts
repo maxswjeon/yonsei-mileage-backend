@@ -22,7 +22,7 @@ const searchLectures = async (req: Request, res: Response) => {
           { EKNA: { $regex: new RegExp(escapeRegExp(query)), $options: "i" } },
         ],
       },
-      { HYHG: "20221" },
+      { HYHG: "20222" },
     ],
   });
 
