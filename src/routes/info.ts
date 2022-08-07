@@ -27,6 +27,7 @@ const min_value_mileage = (
   const { user_grade, user_subject, is_graduate, is_first } = studentInfo;
 
   const min = data
+    .filter((item: any) => item[9] == "O")
     // .filter((item: any) => {
     //   return (
     //     item[8] == user_grade &&
