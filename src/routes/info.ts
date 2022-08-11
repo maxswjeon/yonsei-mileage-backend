@@ -14,6 +14,23 @@ const min_value_mileage = (data: History[]) => {
   return min.length > 0 ? min[0] : -1;
 };
 
+const min_value_mileage_by_grade = (data: History[]) => {
+  const data_grade: number[] = [];
+  const grades = [...new Set(data.map((d) => d.grade))];
+
+  for (let i = 0; i < grades.sort()[grades.length - 1]; i++) {
+    data_grade[i] = -1;
+  }
+
+  for (const grade of grades) {
+    data_grade[grade - 1] = min_value_mileage(
+      data.filter((d) => d.grade === grade)
+    );
+  }
+
+  return data_grade;
+};
+
 const getInfo = async (req: Request, res: Response) => {
   const { id } = req.body;
 
@@ -39,7 +56,12 @@ const getInfo = async (req: Request, res: Response) => {
     PROF: course_base.PROF,
   });
 
-  const data: { course: ICourse; data: History[]; min: number }[] = [];
+  const data: {
+    course: ICourse;
+    data: History[];
+    min: number;
+    min_by_grade: number[];
+  }[] = [];
 
   for (const course of courses) {
     if (course.HYHG === "20222") {
@@ -70,6 +92,7 @@ const getInfo = async (req: Request, res: Response) => {
       course: course,
       data: records,
       min: min_value_mileage(records),
+      min_by_grade: min_value_mileage_by_grade(records),
     });
   }
 
