@@ -2,55 +2,74 @@ import { parse } from "csv";
 import { Request, Response } from "express";
 import fs from "fs";
 import { finished } from "stream/promises";
-import Course from "../models/course";
+import Course, { ICourse } from "../models/course";
+import { fromArray, History } from "../models/history";
 
-// 0 순위
-// 1 마일리지
-// 2 전공자여부
-// 3 신청과목수
-// 4 졸업신청
-// 5 초수강여부
-// 6 총이수학점비율
-// 7 직전학기이수학점비율
-// 8 학년
-// 9 수강여부
-// 10 비고
-const min_value_mileage = (
-  data: any[],
-  studentInfo: {
-    user_grade: number;
-    user_subject: number;
-    is_graduate: boolean;
-    is_first: boolean;
-  }
-) => {
-  const { user_grade, user_subject, is_graduate, is_first } = studentInfo;
-
+const min_value_mileage = (data: History[]) => {
   const min = data
-    .filter((item: any) => item[9] == "O")
-    // .filter((item: any) => {
-    //   return (
-    //     item[8] == user_grade &&
-    //     item[3] == user_subject &&
-    //     item[4] == (is_graduate ? "Y" : "N") &&
-    //     item[5] == (is_first ? "Y" : "N") &&
-    //     item[9] == "O"
-    //   );
-    // })
-    .sort((a, b) => Number(a[1]) - Number(b[1]))
-    .map((d) => d[1]);
+    .filter((history: History) => history.isEnrolled)
+    .sort((a, b) => a.mileage - b.mileage)
+    .map((d) => d.mileage);
 
   return min.length > 0 ? min[0] : -1;
 };
 
 const getInfo = async (req: Request, res: Response) => {
-  const { id, studentInfo, isFirst } = req.body;
+  const { id } = req.body;
 
-  const course = await Course.findById(id);
+  let course_base;
+  try {
+    course_base = await Course.findById(id);
+  } catch {
+    res.status(500).json({
+      result: false,
+      message: "Something went wrong",
+    });
+    return;
+  }
 
-  if (!course) {
+  if (!course_base) {
     return res.status(404).json({
       error: "Course not found",
+    });
+  }
+
+  const courses = await Course.find({
+    KNA: course_base.KNA,
+    PROF: course_base.PROF,
+  });
+
+  const data: { course: ICourse; data: History[]; min: number }[] = [];
+
+  for (const course of courses) {
+    if (course.HYHG === "20222") {
+      continue;
+    }
+
+    const records: History[] = [];
+    const parser = fs
+      .createReadStream(
+        `./data/${course.ocode0}/${course.ocode1}/${
+          course.FILE
+        }/${course.HYHG.substring(0, 4)}-${course.HYHG[4]}.csv`
+      )
+      .pipe(parse());
+
+    parser.on("readable", () => {
+      let record;
+      while ((record = parser.read())) {
+        if (record[0] === "순위") {
+          continue;
+        }
+        records.push(fromArray(record));
+      }
+    });
+    await finished(parser);
+
+    data.push({
+      course: course,
+      data: records,
+      min: min_value_mileage(records),
     });
   }
 
@@ -62,54 +81,12 @@ const getInfo = async (req: Request, res: Response) => {
   // b2 = semester max credit
   // graduate = is a graduate
 
-  const { subjects, grade, graduate } = studentInfo;
-
-  const fileList = await fs.promises.readdir(
-    `./data/${course.ocode0}/${course.ocode1}/${course.FILE}`
-  );
-
-  const data = [];
-
-  for (const file of fileList) {
-    if (file === "2022-2.csv") {
-      continue;
-    }
-
-    const records: any[] = [];
-    const parser = fs
-      .createReadStream(
-        `./data/${course.ocode0}/${course.ocode1}/${course.FILE}/${file}`
-      )
-      .pipe(parse());
-    parser.on("readable", () => {
-      let record;
-      while ((record = parser.read()) !== null) {
-        records.push(record);
-      }
-    });
-
-    await finished(parser);
-
-    records.shift();
-
-    const min = min_value_mileage(records, {
-      user_grade: grade,
-      user_subject: subjects,
-      is_graduate: graduate,
-      is_first: isFirst,
-    });
-
-    data.push({
-      hyhg: file.split(".")[0],
-      min,
-      data: records.filter((data) => data[1] == min),
-      raw: records,
-    });
-  }
+  // const { subjects, grade, graduate } = studentInfo;
 
   return res.status(200).json({
     result: true,
     data,
+    course: course_base,
   });
 };
 

@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 
-interface ICourse {
+export interface ICourse {
   ocode0: string;
   ocode0_title: string;
   ocode1: string;

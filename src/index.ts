@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import getInfo from "./routes/info";
+import login from "./routes/login";
 import searchLectures from "./routes/search";
 
 (async () => {
@@ -31,6 +32,7 @@ import searchLectures from "./routes/search";
 
   app.use("/search", searchLectures);
   app.use("/info", getInfo);
+  app.use("/login", login);
 
   app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
 })();

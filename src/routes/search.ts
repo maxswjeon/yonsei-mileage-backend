@@ -20,6 +20,8 @@ const searchLectures = async (req: Request, res: Response) => {
         $or: [
           { KNA: { $regex: new RegExp(escapeRegExp(query)), $options: "i" } },
           { EKNA: { $regex: new RegExp(escapeRegExp(query)), $options: "i" } },
+          { PROF: { $regex: new RegExp(escapeRegExp(query)), $options: "i" } },
+          { FILE: { $regex: new RegExp(escapeRegExp(query)), $options: "i" } },
         ],
       },
       { HYHG: "20222" },
