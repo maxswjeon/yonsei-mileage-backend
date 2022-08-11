@@ -65,6 +65,7 @@ const getInfo = async (req: Request, res: Response) => {
 
   for (const course of courses) {
     if (course.HYHG === "20222") {
+      course.HYHG = "2022-2";
       continue;
     }
 
@@ -87,6 +88,8 @@ const getInfo = async (req: Request, res: Response) => {
       }
     });
     await finished(parser);
+
+    course.HYHG = `${course.HYHG.substring(0, 4)}-${course.HYHG[4]}`;
 
     data.push({
       course: course,
