@@ -52,6 +52,10 @@ const getInfo = async (req: Request, res: Response) => {
     });
   }
 
+  const everytime = await Everytime.findOne({
+    id: course_base.FILE,
+  });
+
   const courses = await Course.find({
     KNA: course_base.KNA,
     PROF: course_base.PROF,
@@ -59,7 +63,6 @@ const getInfo = async (req: Request, res: Response) => {
 
   const data: {
     course: ICourse;
-    everytime: IEverytime | null;
     data: History[];
     min: number;
     min_by_grade: number[];
@@ -98,13 +101,8 @@ const getInfo = async (req: Request, res: Response) => {
 
     course.HYHG = `${course.HYHG.substring(0, 4)}-${course.HYHG[4]}`;
 
-    const everytime = await Everytime.findOne({
-      code: course.FILE,
-    });
-
     data.push({
       course: course,
-      everytime,
       data: records,
       min: min_value_mileage(records),
       min_by_grade: min_value_mileage_by_grade(records),
@@ -124,6 +122,7 @@ const getInfo = async (req: Request, res: Response) => {
   return res.status(200).json({
     result: true,
     data,
+    everytime,
     course: course_base,
   });
 };
