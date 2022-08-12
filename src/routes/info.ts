@@ -4,6 +4,7 @@ import fs from "fs";
 import { finished } from "stream/promises";
 import Course, { ICourse } from "../models/course";
 import { fromArray, History } from "../models/history";
+import Everytime, { IEverytime } from "./../models/everytime";
 
 const min_value_mileage = (data: History[]) => {
   const min = data
@@ -58,6 +59,7 @@ const getInfo = async (req: Request, res: Response) => {
 
   const data: {
     course: ICourse;
+    everytime: IEverytime | null;
     data: History[];
     min: number;
     min_by_grade: number[];
@@ -96,8 +98,13 @@ const getInfo = async (req: Request, res: Response) => {
 
     course.HYHG = `${course.HYHG.substring(0, 4)}-${course.HYHG[4]}`;
 
+    const everytime = await Everytime.findOne({
+      code: course.FILE,
+    });
+
     data.push({
       course: course,
+      everytime,
       data: records,
       min: min_value_mileage(records),
       min_by_grade: min_value_mileage_by_grade(records),
