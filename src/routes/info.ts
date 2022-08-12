@@ -4,7 +4,7 @@ import fs from "fs";
 import { finished } from "stream/promises";
 import Course, { ICourse } from "../models/course";
 import { fromArray, History } from "../models/history";
-import Everytime, { IEverytime } from "./../models/everytime";
+import Everytime from "./../models/everytime";
 
 const min_value_mileage = (data: History[]) => {
   const min = data
@@ -53,7 +53,7 @@ const getInfo = async (req: Request, res: Response) => {
   }
 
   const everytime = await Everytime.findOne({
-    id: course_base.FILE,
+    code: course_base.FILE,
   });
 
   const courses = await Course.find({
