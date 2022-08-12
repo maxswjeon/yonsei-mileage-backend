@@ -69,6 +69,11 @@ const getInfo = async (req: Request, res: Response) => {
       continue;
     }
 
+    // 계절학기는 마일리지 선택제로 진행되지 않음
+    if (["3", "4"].includes(course.HYHG[4])) {
+      continue;
+    }
+
     const records: History[] = [];
     const parser = fs
       .createReadStream(
